@@ -1,108 +1,159 @@
 # SaaS Registration & Login System
 
-A simple web application with user registration, login, and user listing functionality.
+A full-stack web application demonstrating user registration, authentication, and user management functionality without external authentication libraries.
 
-## Features
-- User registration and login
-- JWT-based authentication
-- View list of all registered users
-- PostgreSQL database
-- Docker containerized
+---
+
+## Quick Start (Docker Desktop v24+)
+
+```bash
+git clone https://github.com/amitEt25/aiven-auth-assigment.git
+cd aiven-auth-assigment
+docker compose up -d --build
+```
+
+| Service   | URL                                            | Default creds               |
+| --------- | ---------------------------------------------- | --------------------------- |
+| Frontend  | [http://localhost:3000](http://localhost:3000) | —                           |
+| API       | [http://localhost:3001](http://localhost:3001) | —                           |
+| pgAdmin\* | [http://localhost:5050](http://localhost:5050) | `admin@admin.com` / `admin` |
+
+\*Optional PostgreSQL administration interface.
+
+### Verification
+
+```bash
+curl -f http://localhost:3001/health          # Expected: {"status":"ok"}
+```
+
+---
+
+## Local development (no Docker)
+
+```bash
+# ---- backend ----
+cd backend
+npm i
+cp .env.local.example .env.local   # edit as needed
+psql -f src/database/schema.sql    # create tables
+# or: docker compose exec postgres psql -U postgres -d saas_auth -f /docker-entrypoint-initdb.d/schema.sql
+# or npm run migrate if you have a script
+npm run dev
+
+# ---- frontend ----
+cd ../frontend
+npm i
+cp .env.example .env               # VITE_API_URL=http://localhost:3001/api
+npm run dev
+```
+
+---
+
+## Application Workflow
+
+1. Navigate to `/register` to create a new account
+2. The application will redirect to `/dashboard` after successful registration
+3. Click **"View Users"** to access `/users` (JWT-protected endpoint)
+
+---
+
+## API Reference
+
+```bash
+# register
+curl -X POST http://localhost:3001/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"email":"alice@demo.com","password":"Secret123","first_name":"Alice","last_name":"Demo"}'
+
+# login (returns JWT)
+curl -X POST http://localhost:3001/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"alice@demo.com","password":"Secret123"}'
+
+# Retrieve all users (replace <token> with actual JWT)
+curl http://localhost:3001/api/users \
+     -H "Authorization: Bearer <token>"
+```
+
+**Routes:**
+
+| Method | Path                 | Protected |
+| ------ | -------------------- | --------- |
+| POST   | `/api/auth/register` | ❌        |
+| POST   | `/api/auth/login`    | ❌        |
+| GET    | `/api/auth/profile`  | ✅        |
+| GET    | `/api/users`         | ✅        |
+
+---
+
+## Security Overview
+
+The application implements comprehensive security measures including password hashing with scrypt and 32-byte salt. JWT tokens expire after 24 hours. Rate limiting allows 60 authentication attempts per hour. Additional protection includes security headers and server-side input validation.
+
+For detailed security implementation information, see **SECURITY.md**.
+
+---
+
+## Production Deployment
+
+### Prerequisites
+
+1. **Update security credentials** in `docker-compose.yml`:
+
+   ```yaml
+   DB_PASSWORD: <secure-database-password>
+   JWT_SECRET: <secure-jwt-secret>
+   ```
+
+2. **Implement HTTPS** using nginx with SSL/TLS certificates
+
+3. **Consider managed services** for PostgreSQL and Redis-based rate limiting
+
+4. **Implement monitoring** using tools such as Prometheus, Grafana, or Loki
+
+### Scaling Example
+
+```bash
+# Deploy with 3 backend replicas (requires load balancer setup)
+# Note: This requires additional configuration for port mapping
+docker compose up -d --scale backend=3
+```
+
+**Note**: The scaling example requires a load balancer (like nginx) to distribute traffic across multiple backend instances, as Docker Compose cannot map multiple containers to the same external port. The backend is stateless with no user uploads saved locally.
+
+---
+
+## Troubleshooting and Monitoring
+
+### Service Status
+
+```bash
+docker compose ps                # Check service status
+docker compose logs -f backend   # Monitor backend logs
+docker compose logs -f frontend  # Monitor frontend logs
+docker compose logs -f postgres  # Monitor database logs
+docker stats                     # Monitor container resources
+lsof -i :3000                   # Check frontend port
+lsof -i :3001                   # Check backend port
+```
+
+### Reset Environment
+
+```bash
+docker compose down -v --rmi all && docker compose up -d
+```
+
+---
 
 ## Tech Stack
-- **Backend**: Node.js, Express, TypeScript, PostgreSQL
-- **Frontend**: React, TypeScript, Material-UI
-- **Database**: PostgreSQL
 
-## Setup Instructions
+- **Backend** Node.js 18 • Express • TypeScript
+- **Frontend** React + Vite • Material‑UI
+- **DB** PostgreSQL 15
+- **Dev/Ops** Docker • Docker Compose
 
-### Using Docker
-1. Clone the repository
-2. Make sure Docker and Docker Compose are installed
-3. Run the application:
-```bash
-docker-compose up --build
-```
-4. Wait for all services to start
-5. Access the application:
-   - **Frontend**: http://localhost:3000
-   - **Backend API**: http://localhost:3001
-   - **pgAdmin**: http://localhost:5050 (admin@admin.com / admin)
+---
 
-### Database Access
-- **PostgreSQL**: localhost:5432 (postgres/password)
-- **pgAdmin**: http://localhost:5050 (admin@admin.com / admin)
+### License
 
-### Quick Test
-Test that everything is working:
-```bash
-# Test backend health
-curl http://localhost:3001/health
-
-# Test frontend
-curl http://localhost:3000
-```
-
-### Manual Setup
-
-#### Backend
-1. Navigate to backend directory:
-```bash
-cd backend
-npm install
-```
-
-2. Create `.env.local` file with:
-```
-PORT=3001
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=saas_auth
-DB_USER=postgres
-DB_PASSWORD=password
-JWT_SECRET=my-very-secret-jwt-key-you-will-never-guess
-```
-
-3. Setup PostgreSQL database and run the schema
-4. Start the server:
-```bash
-npm run dev
-```
-
-#### Frontend
-1. Navigate to frontend directory:
-```bash
-cd frontend
-npm install
-```
-
-2. Create `.env` file:
-```
-VITE_API_URL=http://localhost:3001/api
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-
-## Usage
-1. Register a new account at `/register`
-2. Login at `/login`
-3. View dashboard after successful login
-4. Click "View Users" to see all registered users
-
-## API Endpoints
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/profile` - Get user profile (protected)
-- `GET /api/users` - Get all users (protected)
-
-## Security Features
-- **Password Security**: Custom scrypt hashing with 32-byte salt
-- **JWT Authentication**: Custom HMAC-SHA256 implementation  
-- **Rate Limiting**: 5 auth attempts per 15 minutes
-- **Security Headers**: Comprehensive protection headers
-- **Input Validation**: Express-validator with sanitization
-
-> **Note**: For detailed security implementation guide, see [SECURITY.md](SECURITY.md). 
+[MIT License](LICENSE) - Please ensure proper security measures are implemented in production environments.
