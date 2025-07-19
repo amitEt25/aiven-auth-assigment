@@ -26,28 +26,7 @@ docker compose up -d --build
 curl -f http://localhost:3001/health          # Expected: {"status":"ok"}
 ```
 
----
 
-## Local development (no Docker)
-
-```bash
-# ---- backend ----
-cd backend
-npm i
-cp .env.local.example .env.local   # edit as needed
-psql -f src/database/schema.sql    # create tables
-# or: docker compose exec postgres psql -U postgres -d saas_auth -f /docker-entrypoint-initdb.d/schema.sql
-# or npm run migrate if you have a script
-npm run dev
-
-# ---- frontend ----
-cd ../frontend
-npm i
-cp .env.example .env               # VITE_API_URL=http://localhost:3001/api
-npm run dev
-```
-
----
 
 ## Application Workflow
 
