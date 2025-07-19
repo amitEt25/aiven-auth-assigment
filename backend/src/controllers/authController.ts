@@ -8,13 +8,11 @@ export const register = async (req: Request, res: Response) => {
 
     const existingUser = await UserModel.findByEmail(email);
     if (existingUser) {
-      return res
-        .status(409)
-        .json({ 
-          message: "User with this email already exists",
-          code: "user_exists",
-          type: "registration_error"
-        });
+      return res.status(409).json({
+        message: "User with this email already exists",
+        code: "user_exists",
+        type: "registration_error",
+      });
     }
 
     const user = await UserModel.create({
@@ -26,7 +24,7 @@ export const register = async (req: Request, res: Response) => {
 
     const token = JWTUtils.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET || "fallback-secret"
+      process.env.JWT_SECRET || "my-very-secret-jwt-key-you-will-never-guess"
     );
 
     res.status(201).json({
@@ -43,10 +41,10 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Registration failed:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Failed to register user",
       code: "registration_failed",
-      type: "server_error"
+      type: "server_error",
     });
   }
 };
@@ -58,25 +56,25 @@ export const login = async (req: Request, res: Response) => {
     const user = await UserModel.findByEmail(email);
 
     if (!user) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         message: "Incorrect email address or password",
         code: "invalid_credentials",
-        type: "authentication_error"
+        type: "authentication_error",
       });
     }
 
     const isValidPassword = await UserModel.verifyPassword(user, password);
     if (!isValidPassword) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         message: "Incorrect email address or password",
-        code: "invalid_credentials", 
-        type: "authentication_error"
+        code: "invalid_credentials",
+        type: "authentication_error",
       });
     }
 
     const token = JWTUtils.sign(
       { id: user.id, email: user.email },
-      process.env.JWT_SECRET || "fallback-secret"
+      process.env.JWT_SECRET || "my-very-secret-jwt-key-you-will-never-guess"
     );
 
     res.json({
@@ -93,10 +91,10 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Failed to login",
       code: "login_failed",
-      type: "server_error"
+      type: "server_error",
     });
   }
 };

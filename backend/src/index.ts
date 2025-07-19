@@ -19,7 +19,7 @@ app.use(
   })
 );
 
-// Security middleware
+// Security headers - applies to all routes
 app.use(securityHeaders);
 
 // Health check
@@ -27,11 +27,11 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// Routes with rate limiting for auth
+// API routes - auth has rate limiting, users route is protected by JWT middleware
 app.use("/api/auth", authRateLimit, authRoutes);
 app.use("/api/users", userRoutes);
 
-// Simple error handler
+// Error handler
 app.use(
   (
     err: any,

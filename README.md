@@ -16,14 +16,14 @@ A simple web application with user registration, login, and user listing functio
 
 ## Setup Instructions
 
-### Using Docker (Recommended)
+### Using Docker
 1. Clone the repository
 2. Make sure Docker and Docker Compose are installed
 3. Run the application:
 ```bash
 docker-compose up --build
 ```
-4. Wait for all services to start (about 30-60 seconds)
+4. Wait for all services to start
 5. Access the application:
    - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:3001
@@ -60,7 +60,7 @@ DB_PORT=5432
 DB_NAME=saas_auth
 DB_USER=postgres
 DB_PASSWORD=password
-JWT_SECRET=your-secret-key
+JWT_SECRET=my-very-secret-jwt-key-you-will-never-guess
 ```
 
 3. Setup PostgreSQL database and run the schema
@@ -96,4 +96,13 @@ npm run dev
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/profile` - Get user profile (protected)
-- `GET /api/users` - Get all users (protected) 
+- `GET /api/users` - Get all users (protected)
+
+## Security Features
+- **Password Security**: Custom scrypt hashing with 32-byte salt
+- **JWT Authentication**: Custom HMAC-SHA256 implementation  
+- **Rate Limiting**: 5 auth attempts per 15 minutes
+- **Security Headers**: Comprehensive protection headers
+- **Input Validation**: Express-validator with sanitization
+
+> **Note**: For detailed security implementation guide, see [SECURITY.md](SECURITY.md). 

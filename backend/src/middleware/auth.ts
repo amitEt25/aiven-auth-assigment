@@ -7,7 +7,6 @@ declare global {
       user?: {
         id: number;
         email: string;
-        role?: string;
       };
     }
   }
@@ -25,7 +24,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const token = authHeader.substring(7); // remove 'Bearer ' prefix
-    const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
+    const secret = process.env.JWT_SECRET || 'my-very-secret-jwt-key-you-will-never-guess';
     
     const payload = JWTUtils.verify(token, secret);
     
@@ -38,8 +37,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
 
     req.user = {
       id: payload.id,
-      email: payload.email,
-      role: 'user' // Default role for all authenticated users
+      email: payload.email
     };
 
     next();

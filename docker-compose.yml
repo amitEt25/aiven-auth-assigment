@@ -40,7 +40,7 @@ services:
       - DB_NAME=saas_auth
       - DB_USER=postgres
       - DB_PASSWORD=password
-      - JWT_SECRET=my-secret-key  # TODO: change this
+      - JWT_SECRET=my-very-secret-jwt-key-you-will-never-guess
     networks:
       - saas-network
 
