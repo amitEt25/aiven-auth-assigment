@@ -54,14 +54,7 @@ curl http://localhost:3001/api/users \
      -H "Authorization: Bearer <token>"
 ```
 
-**Routes:**
-
-| Method | Path                 | Protected |
-| ------ | -------------------- | --------- |
-| POST   | `/api/auth/register` | ❌        |
-| POST   | `/api/auth/login`    | ❌        |
-| GET    | `/api/auth/profile`  | ✅        |
-| GET    | `/api/users`         | ✅        |
+**Available endpoints:** `/api/auth/register`, `/api/auth/login`, `/api/auth/profile`, `/api/users`
 
 ---
 
